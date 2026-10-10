@@ -1,0 +1,36 @@
+mkdir -p build
+cc -Iinclude -std=c11 -O2 -g -Wall -Wextra -Wpedantic -Werror src/weave.c src/research.c -o build/weave-research -lcrypto -lm
+cc -Iinclude -std=c11 -O2 -g -Wall -Wextra -Wpedantic -Werror src/weave.c tests/test_weave.c -o build/weave-tests -lcrypto -lm
+./build/weave-tests
+PASS rejects_configuration
+PASS genesis_deterministic
+PASS mines_and_replays
+PASS wrong_parents_rejected
+PASS wrong_archives_rejected
+PASS tampered_payload_rejected
+PASS tampered_proof_rejected
+PASS tampered_binder_rejected
+PASS tampered_id_rejected
+PASS duplicate_slot_rejected
+PASS future_wave_rejected
+PASS descendant_cone
+PASS fork_worlds_are_distinct
+PASS archival_refs_replay_through_epochs
+PASS reject_capacity
+ALL 15 TESTS PASSED
+GCC+Clang+ASAN/UBSAN local test runs: 15/15 passed.
+$ ./build/weave-research --width 3 --waves 4 --bits 8
+{"model":"synchronous-coupled-cycle-DAG","width":3,"waves":4,"cycles":12,"verified":true,"difficulty_bits":8,"expected_unique_sha3_trials":12288,"rewritten_cycle":"0c872049bae4238b1272a0934a823cfa0c8bc0ffbde275edd5b5e7cb28a0b1c2","invalidated_descendants":9}
+$ ./build/weave-research --width 5 --waves 4 --bits 8
+{"model":"synchronous-coupled-cycle-DAG","width":5,"waves":4,"cycles":20,"verified":true,"difficulty_bits":8,"expected_unique_sha3_trials":30720,"rewritten_cycle":"ea3a4bdc44a00646a4aad64b709a876b6660411d7858636cf33309b60607785a","invalidated_descendants":15}
+$ ./build/weave-research --attack --trials 20000 --rounds 100 --seed 42
+MODEL: PoW deficit random walk. Defender starts 6 accepted units ahead.
+MODEL: each round gives 1 unit to the attacker with probability q, otherwise defender.
+MODEL: no lattice scheduling, consensus, network delays, witnesses, or finality.
+hash_share,successes,trials,success_fraction,round_limit
+0.30,117,20000,0.005850,100
+0.45,5050,20000,0.252500,100
+0.51,12294,20000,0.614700,100
+0.55,16832,20000,0.841600,100
+0.70,20000,20000,1.000000,100
+0.99,20000,20000,1.000000,100
