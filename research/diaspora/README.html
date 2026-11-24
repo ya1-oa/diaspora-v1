@@ -34,7 +34,8 @@ bash research/diaspora/lab/wallet-smoke.sh "$PWD/build/bin"</code></pre>
 <p>You can pass an absolute path to a Bitcoin Core release binary directory to run the same baseline. The recorded run used Bitcoin Core 29.0. Use <code>DIASPORA_RPC_PORT=28443</code> before the command if the default port is in use. A standalone Diaspora ledger wallet remains part of the production target.</p>
 </section>
 <section id="radio">
-<h2>Rehearse a radio transfer on two computers</h2>
+<h2>Run Weave on two radio endpoints</h2>
+<p>Follow the <a href="lab/RADIO.md">two-node radio walkthrough</a> to mine, relay and validate complete Weave waves through a local TCP KISS modem. The file loopback below is a separate transport check.</p>
 <ol>
 <li>On the first machine, create public test data and packetize it. The lab uses a fixed header and 128-byte payload fragments, with at most 128 fragments.</li>
 <li>Copy the packet directory to the second machine over removable media or an isolated link. Try reordering the files or removing one to observe recovery and failure behavior.</li>
