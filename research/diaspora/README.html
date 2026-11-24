@@ -45,7 +45,14 @@ python3 research/diaspora/lab/packet.py encode public.txt packets
 # Copy packets/ to the second machine, then:
 python3 research/diaspora/lab/packet.py decode packets received.txt
 cat received.txt</code></pre>
-<p>For the hardware milestone, put an adapter between this packet format and a TNC or modem. Start with an isolated audio cable or shielded bench setup with public test strings. Specify a KISS/AX.25 information-field mapping or a LoRa gateway mapping, measure the modem's effective payload and airtime, and add pacing and retry limits before enabling any over-the-air mode. An actual RF adapter and satellite gateway remain release gates. In the United States, Part 97 limits amateur transmissions involving pecuniary interest and messages encoded to obscure their meaning. Verify service, equipment, and payload eligibility before transmitting. See <a href="https://www.law.cornell.edu/cfr/text/47/97.113">47 CFR § 97.113</a>.</p>
+<h3>Prepare an AX.25/KISS bench capture</h3>
+<p>The KISS helper adds AX.25 UI addressing and KISS byte escaping to the packet files. The TNC supplies the on-air frame check sequence. This bench format uses direct addressing on KISS port 0 with no digipeaters, and is separate from the original D-AX.25 draft.</p>
+<pre><code>python3 research/diaspora/lab/kiss.py wrap packets tx.kiss --source LABA-1 --destination LABB-2
+# File loopback, before connecting the modems:
+python3 research/diaspora/lab/kiss.py unwrap tx.kiss loopback.txt --source LABA-1 --destination LABB-2
+cmp public.txt loopback.txt</code></pre>
+<p>For hardware testing, configure two TNCs for KISS mode and the same modem rate. Start with isolated audio or a shielded bench link. Begin capture on the receiving host, then feed <code>tx.kiss</code> into the sending TNC using its documented serial or TCP KISS interface. Save the receiver's raw KISS data as <code>rx.kiss</code> and run <code>unwrap rx.kiss received.txt</code> with the same callsigns. Use a dedicated test capture containing only these data frames. If the link drops a frame, rerun with a complete receive capture. Verify the recovered bytes with <code>cmp</code>.</p>
+<p>Hardware interoperability, airtime, pacing, retry limits, LoRa, and satellite remain release gates. In the United States, Part 97 limits amateur transmissions involving pecuniary interest and messages encoded to obscure their meaning. Verify service, equipment, callsigns and payload eligibility before transmitting. See <a href="https://www.law.cornell.edu/cfr/text/47/97.113">47 CFR § 97.113</a>.</p>
 <p>The packet hash verifies reassembly integrity. A blockchain node still validates the recovered transaction. Keep private keys and wallet backups off this transport.</p>
 </section>
 <section id="security">

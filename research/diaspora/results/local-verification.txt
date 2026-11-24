@@ -32,6 +32,10 @@ hash_share,successes,trials,success_fraction,round_limit
 0.70,20000,20000,1.000000,100
 0.99,20000,20000,1.000000,100
 make: Leaving directory '/workspace/scratch/52cfeae03360/diaspora/research/weave-lattice-c'
+test_callsign_encoding (test_kiss.KissTest.test_callsign_encoding) ... ok
+test_rejects_invalid_escape (test_kiss.KissTest.test_rejects_invalid_escape) ... ok
+test_rejects_wrong_receiver (test_kiss.KissTest.test_rejects_wrong_receiver) ... ok
+test_round_trip_with_reserved_bytes (test_kiss.KissTest.test_round_trip_with_reserved_bytes) ... ok
 test_conflicting_duplicates_are_rejected (test_packet.PacketTest.test_conflicting_duplicates_are_rejected) ... ok
 test_corruption_is_reported (test_packet.PacketTest.test_corruption_is_reported) ... ok
 test_limits (test_packet.PacketTest.test_limits) ... ok
@@ -40,7 +44,7 @@ test_mixed_transfers_are_rejected (test_packet.PacketTest.test_mixed_transfers_a
 test_reorder_and_duplicate (test_packet.PacketTest.test_reorder_and_duplicate) ... ok
 
 ----------------------------------------------------------------------
-Ran 6 tests in 0.001s
+Ran 10 tests in 0.002s
 
 OK
 test_archives_deterministic_and_validated (test_weave.LatticeTests.test_archives_deterministic_and_validated) ... ok
@@ -56,9 +60,10 @@ test_three_or_more_non_lane_frontier_dependencies (test_weave.LatticeTests.test_
 test_unique_work_accounting (test_weave.LatticeTests.test_unique_work_accounting) ... ok
 
 ----------------------------------------------------------------------
-Ran 11 tests in 0.063s
+Ran 11 tests in 0.062s
 
 OK
 
 Wallet integration using upstream Bitcoin Core 29.0 Linux x86_64 release binaries
 PASS: wallet creation, mature funds, transaction byte round trip and confirmed receipt
+PASS: KISS command-line file loopback
