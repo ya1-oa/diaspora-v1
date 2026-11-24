@@ -198,6 +198,21 @@ fn strict_quorums_must_overlap_beyond_byzantine_budget() {
 }
 
 #[test]
+fn exhaustive_quorum_pairs_reach_but_never_cross_the_intersection_bound() {
+    for size in 4..=10 {
+        let quorum = (2 * size) / 3 + 1;
+        let sets: Vec<_> = (0u32..1 << size)
+            .filter(|members| members.count_ones() == quorum)
+            .collect();
+        let minimum = sets
+            .iter()
+            .flat_map(|a| sets.iter().map(move |b| (a & b).count_ones()))
+            .min();
+        assert_eq!(minimum, Some(2 * quorum - size));
+    }
+}
+
+#[test]
 fn network_file_is_strict_and_commits_the_ordered_committee() {
     let keys = keys();
     let mut file = b"DIASPORA:WEAVE:NETWORK:V1\0".to_vec();
