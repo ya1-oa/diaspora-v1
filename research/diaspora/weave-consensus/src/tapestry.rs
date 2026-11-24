@@ -87,7 +87,7 @@ impl World {
         organisms
     }
 
-    fn step(&mut self) {
+    fn step(&mut self, origin: Id) {
         let snapshot = self.cells.clone();
         for (&position, cell) in &mut self.cells {
             let adjacent = neighbors(position).filter_map(|p| snapshot.get(&p));
@@ -101,20 +101,66 @@ impl World {
                 air |= neighbor.kind == Kind::Air;
                 earth |= neighbor.kind == Kind::Earth;
             }
-            if cell.kind == Kind::Seed {
-                cell.energy = if water {
-                    cell.energy.saturating_add(2)
-                } else {
-                    cell.energy.saturating_sub(1)
-                };
-                if cell.energy >= 4 {
-                    cell.kind = match (fire, air, earth) {
-                        (true, _, _) => Kind::Forge,
-                        (_, true, _) => Kind::Conduit,
-                        (_, _, true) => Kind::Vault,
-                        _ => Kind::Seed,
+            match cell.kind {
+                Kind::Fire => {
+                    let loss = if water {
+                        4
+                    } else if air {
+                        1
+                    } else {
+                        2
                     };
+                    cell.energy = cell.energy.saturating_sub(loss);
                 }
+                Kind::Seed | Kind::Conduit if fire && !water => {
+                    // The consumed cell supplies the fuel and retains its lineage.
+                    cell.kind = Kind::Fire;
+                    cell.energy = cell.energy.clamp(2, 6) - 1;
+                }
+                Kind::Seed => {
+                    cell.energy = if water {
+                        cell.energy.saturating_add(2)
+                    } else {
+                        cell.energy.saturating_sub(1)
+                    };
+                    if cell.energy >= 4 {
+                        cell.kind = match (fire, air, earth) {
+                            (true, _, _) => Kind::Forge,
+                            (_, true, _) => Kind::Conduit,
+                            (_, _, true) => Kind::Vault,
+                            _ => Kind::Seed,
+                        };
+                    }
+                }
+                _ => {}
+            }
+        }
+        // Only empty sites bordering Earth can nucleate new life.
+        let fertile: BTreeSet<_> = snapshot
+            .iter()
+            .filter(|(_, cell)| cell.kind == Kind::Earth)
+            .flat_map(|(&position, _)| neighbors(position))
+            .filter(|position| !snapshot.contains_key(position))
+            .collect();
+        for position in fertile {
+            let adjacent = neighbors(position).filter_map(|p| snapshot.get(&p));
+            let mut water = false;
+            let mut air = false;
+            let mut fire = false;
+            for neighbor in adjacent {
+                water |= neighbor.kind == Kind::Water;
+                air |= neighbor.kind == Kind::Air;
+                fire |= neighbor.kind == Kind::Fire;
+            }
+            if water && air && !fire {
+                self.cells.insert(
+                    position,
+                    Cell {
+                        kind: Kind::Seed,
+                        energy: 2,
+                        origin,
+                    },
+                );
             }
         }
         self.cells.retain(|_, cell| cell.energy != 0);
@@ -249,7 +295,7 @@ impl Storyteller {
                         world.cells.remove(&impact.position);
                     }
                 }
-                world.step();
+                world.step(origin);
             }
             self.selected_history = path;
         }
@@ -294,7 +340,7 @@ impl Storyteller {
     pub fn html(&self) -> String {
         let mut html = String::from(
             r#"<!doctype html><html lang="en"><meta charset="utf-8"><title>Living Tapestry</title>
-<style>body{font:16px system-ui;max-width:72rem;margin:3rem auto;padding:0 1rem;background:#141b19;color:#f0f2e8}article{border-left:3px solid #9ccc9b;padding:1rem;margin:1rem 0;background:#202925}code{overflow-wrap:anywhere}li{margin:.3rem 0}.grid{display:grid;grid-template-columns:repeat(12,1.8rem);gap:2px}.grid span{display:grid;place-items:center;aspect-ratio:1;background:#37473e}.grid .void{opacity:.25}.grid .lost{outline:2px solid #f0a093;color:#ffbeb4}</style>
+<style>body{font:16px system-ui;max-width:72rem;margin:3rem auto;padding:0 1rem;background:#141b19;color:#f0f2e8}article{border-left:3px solid #9ccc9b;padding:1rem;margin:1rem 0;background:#202925}code{overflow-wrap:anywhere}li{margin:.3rem 0}.grid{display:grid;grid-template-columns:repeat(12,1.8rem);gap:2px}.grid span{display:grid;place-items:center;aspect-ratio:1;background:#37473e}.grid .void{opacity:.25}.grid .E{background:#664d38}.grid .W{background:#245e87}.grid .A{background:#405878}.grid .F{background:#a43a19}.grid .S{background:#406a29}.grid .C{background:#176d65}.grid .G{background:#805015}.grid .V{background:#634a85}.grid .lost{outline:2px solid #f0a093;color:#ffbeb4}</style>
 <h1>Living Tapestry</h1><p>Local observations in arrival order. A competing frontier alone does not establish an attack.</p>
 <p>E Earth · W Water · A Air · F Fire · S Seed · C Conduit · G Forge · V Vault · × orphaned cell. Map shows the first 12 × 12 cells.</p>"#,
         );
@@ -319,8 +365,14 @@ impl Storyteller {
             }
             write!(
                 html,
-                "<p>{} organisms · {} occupied cells · {} total energy</p>",
+                "<p>{} organisms · {} burning cells · {} occupied cells · {} total energy</p>",
                 frame.world.organisms().len(),
+                frame
+                    .world
+                    .cells()
+                    .values()
+                    .filter(|cell| cell.kind == Kind::Fire)
+                    .count(),
                 frame.world.cells().len(),
                 frame
                     .world
@@ -347,7 +399,8 @@ impl Storyteller {
                     let glyph = cell.map_or(if class == "lost" { '×' } else { '·' }, |cell| {
                         cell.kind.glyph()
                     });
-                    write!(html, "<span class='{class}'>{glyph}</span>").unwrap();
+                    let kind = cell.map_or(' ', |cell| cell.kind.glyph());
+                    write!(html, "<span class='{class} {kind}'>{glyph}</span>").unwrap();
                 }
             }
             html.push_str("</div><details><summary>Cells and provenance</summary><ul>");

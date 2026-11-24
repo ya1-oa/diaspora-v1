@@ -11,11 +11,13 @@ cargo test --locked --all-targets --manifest-path research/diaspora/weave-consen
 cargo run --locked --manifest-path research/diaspora/weave-consensus/Cargo.toml --example storyteller -- tapestry.html
 ```
 
-Open `tapestry.html` in any browser. The standalone file contains three observations in order. The first frontier grows a Conduit. A different provisional frontier replaces it and Storyteller leaves the original snapshot in the archive, marks where the structure was orphaned, and shows its creating frontier. A later observation records a heavier branch that disagrees with the certified frontier. That branch stays out of the selected world.
+Append `--populated` after the output filename for a ten-tick ecology replay.
+
+Open the default `tapestry.html` in any browser. The standalone file contains three observations in order. The first frontier grows a Conduit. A different provisional frontier replaces it and Storyteller leaves the original snapshot in the archive, marks where the structure was orphaned, and shows its creating frontier. A later observation records a heavier branch that disagrees with the certified frontier. That branch stays out of the selected world.
 
 ## Draft ecology
 
-Earth, Water, Air and Fire provide neighborhood conditions. A Seed gains energy near Water and loses energy without it. At the growth threshold, Fire, Air and Earth can mature it into a Forge, Conduit or Vault respectively, in that precedence order. Connected Seeds and mature structures form an organism. The first 12 by 12 cells render on the board. The provenance detail below the board includes the full sparse world. Void clears a cell. Every occupied cell keeps the ID of the frontier that placed it, including after a Seed matures.
+Earth stays in place and supports Vault maturation. Water hydrates neighboring Seeds, shields wet fuel, and drains nearby Fire faster. Air helps Seeds mature into Conduits and slows nearby Fire burnout. Fire ignites dry Seeds and Conduits, then depletes its fuel energy and becomes Void. It can help a hydrated Seed mature into a Forge. Forges and Vaults are fire-resistant in this draft. A Seed gains energy near Water and loses energy without it. At the growth threshold, Fire, Air and Earth can mature it into a Forge, Conduit or Vault respectively, in that precedence order. Connected Seeds and mature structures form an organism. The first 12 by 12 cells render on the board. The provenance detail below the board includes the full sparse world. Empty Void next to Earth, Water, and Air grows a Seed if no Fire is nearby. New Seeds record the frontier whose tick created them. Void impacts clear a cell before the tick. Every occupied cell keeps the ID of the frontier that placed it, including after a Seed matures.
 
 Each frontier supplies ordered impacts. One synchronous tick follows each frontier. Given identical history and impacts, every replay has the same result. An alternate history can yield a different visible world, or it can yield visually identical cells with different provenance. The signed frontier determines which history is accepted. The ecology shows its consequences.
 

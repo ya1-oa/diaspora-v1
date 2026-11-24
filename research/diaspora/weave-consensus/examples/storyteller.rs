@@ -86,16 +86,96 @@ fn demonstration() -> Storyteller {
     storyteller
 }
 
+fn populated() -> Storyteller {
+    use Kind::*;
+    let keys = (1..=4)
+        .map(|id| SigningKey::from_bytes(&[id; 32]).verifying_key())
+        .collect();
+    let choice = ForkChoice::new(Network::new([9; 32], [0; 32], 2, keys).unwrap());
+    let mut terrain = Vec::new();
+    for y in 1..=9 {
+        terrain.push(place(5, y, Water, 9));
+        terrain.push(place(0, y, Earth, 9));
+    }
+    for x in 1..=3 {
+        terrain.push(place(x, 3, Air, 6));
+        terrain.push(place(x, 8, Earth, 9));
+        terrain.push(place(x, 4, Seed, 5));
+        terrain.push(place(x, 7, Seed, 5));
+    }
+    terrain.extend([
+        place(4, 4, Seed, 3),
+        place(4, 5, Seed, 3),
+        place(4, 7, Seed, 3),
+        place(4, 8, Seed, 3),
+        place(1, 5, Water, 9),
+        place(4, 9, Earth, 9),
+        place(8, 3, Air, 5),
+        place(9, 3, Air, 5),
+        place(9, 5, Seed, 10),
+        place(10, 5, Seed, 10),
+        place(10, 6, Seed, 10),
+        place(9, 7, Seed, 10),
+        place(8, 7, Seed, 10),
+        place(8, 8, Seed, 10),
+        place(7, 7, Conduit, 6),
+        place(8, 10, Vault, 9),
+        place(6, 2, Earth, 9),
+        place(7, 3, Air, 6),
+        place(7, 1, Forge, 9),
+        place(2, 10, Earth, 9),
+        place(3, 10, Vault, 9),
+    ]);
+    let mut storyteller = Storyteller::default();
+    let mut history = vec![(1, 5)];
+    let mut impacts = vec![terrain];
+    for tick in 1..=10 {
+        storyteller
+            .observe(&choice, &[branch(&history, impacts.clone())])
+            .unwrap();
+        history.push((tick + 1, 5));
+        impacts.push(if tick == 1 {
+            vec![place(10, 4, Fire, 5)]
+        } else {
+            vec![]
+        });
+    }
+    storyteller
+}
+
 fn main() -> std::io::Result<()> {
-    let path = env::args_os()
-        .nth(1)
-        .unwrap_or_else(|| "tapestry.html".into());
-    fs::write(path, demonstration().html())
+    let mut args = env::args_os().skip(1);
+    let path = args.next().unwrap_or_else(|| "tapestry.html".into());
+    let tapestry = if args.next().as_deref() == Some(std::ffi::OsStr::new("--populated")) {
+        populated()
+    } else {
+        demonstration()
+    };
+    fs::write(path, tapestry.html())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn populated_world_burns_dry_fuel_then_burns_out() {
+        let tapestry = populated();
+        let frames = tapestry.frames();
+        assert!(frames[0].world.organisms().len() >= 3);
+        assert_eq!(frames[0].world.cells()[&(9, 5)].kind, Kind::Seed);
+        assert_eq!(frames[0].world.cells()[&(6, 3)].kind, Kind::Seed);
+        assert_eq!(frames[1].world.cells()[&(6, 3)].kind, Kind::Conduit);
+        assert_eq!(frames[1].world.cells()[&(9, 5)].kind, Kind::Fire);
+        assert_eq!(frames[1].world.cells()[&(9, 5)].origin, [1; 32]);
+        assert_eq!(frames[0].world.cells()[&(4, 8)].kind, Kind::Vault);
+        assert!(!frames[9]
+            .world
+            .cells()
+            .values()
+            .any(|cell| cell.kind == Kind::Fire));
+        assert_eq!(frames[9].world.cells()[&(5, 5)].kind, Kind::Water);
+    }
 
     #[test]
     fn storyteller_keeps_the_original_world_and_marks_orphaned_lineage() {
