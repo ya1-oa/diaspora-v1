@@ -6,6 +6,8 @@ use ed25519_dalek::{Signature, VerifyingKey};
 use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, BTreeSet};
 
+pub mod tapestry;
+
 pub type Id = [u8; 32];
 
 const NETWORK_MAGIC: &[u8] = b"DIASPORA:WEAVE:NETWORK:V1\0";
@@ -285,19 +287,27 @@ impl ForkChoice {
         Ok(())
     }
 
+    fn compatible(&self, history: &ValidatedHistory) -> bool {
+        history.genesis == self.network.genesis.id
+            && history.id_at(self.finalized.height) == Some(self.finalized.id)
+    }
+
     pub fn select<'a>(
         &self,
         histories: &'a [ValidatedHistory],
+    ) -> Result<Option<&'a ValidatedHistory>, Error> {
+        self.select_iter(histories.iter())
+    }
+
+    fn select_iter<'a>(
+        &self,
+        histories: impl Iterator<Item = &'a ValidatedHistory>,
     ) -> Result<Option<&'a ValidatedHistory>, Error> {
         if self.halted {
             return Err(Error::ConflictingFinality);
         }
         Ok(histories
-            .iter()
-            .filter(|history| {
-                history.genesis == self.network.genesis.id
-                    && history.id_at(self.finalized.height) == Some(self.finalized.id)
-            })
+            .filter(|history| self.compatible(history))
             .max_by_key(|history| history.score()))
     }
 }

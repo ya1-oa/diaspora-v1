@@ -27,6 +27,8 @@ The network ID is SHA-256 of the entire file. The interval is measured in comple
 
 ## What the security claim depends on
 
+See the [Living Tapestry and Storyteller draft](LIVING-TAPESTRY.md) for the ecology, fork observations, and an exportable history demo.
+
 See the [finalized-history resistance proof](RESISTANCE.md) for the exact witness bound and implementation assumptions.
 
 For a fixed set of `n` validators, quorum `q = floor(2n/3) + 1` means any two quorums intersect in at least `2q - n` validators. With fewer than one-third Byzantine validators, that intersection contains an honest signer. For safety, honest signers must durably refuse to endorse incompatible targets at the same checkpoint height and must only extend a certified parent they have verified. For four validators the quorum is three and any two quorums overlap in at least two signers.
