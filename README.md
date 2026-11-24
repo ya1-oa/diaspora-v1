@@ -1,3 +1,16 @@
+# Diaspora
+
+Diaspora is a peer-to-peer money and resilient networking research project for the African diaspora. This branch brings the recovered Weave prototypes and original protocol draft into the Bitcoin Core-derived repository, alongside an isolated wallet and transport lab.
+
+- [Setup and wallet walkthrough](research/diaspora/README.html) (open locally in a browser)
+- [Production target and security gates](research/diaspora/PRODUCTION.md)
+- [Development log](research/diaspora/DEVELOPMENT-LOG.md)
+- [Verification transcript](research/diaspora/results/local-verification.txt)
+
+The node on this branch is the inherited Bitcoin Core implementation. Weave runs in the research harness.
+
+---
+
 Bitcoin Core integration/staging tree
 =====================================
 

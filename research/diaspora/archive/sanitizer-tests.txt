@@ -1,0 +1,27 @@
+make clean
+make[1]: Entering directory '/mnt/data/diaspora-lattice-research/research/weave-lattice-c'
+rm -rf build
+make[1]: Leaving directory '/mnt/data/diaspora-lattice-research/research/weave-lattice-c'
+make CFLAGS='-std=c11 -O1 -g -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer' test
+make[1]: Entering directory '/mnt/data/diaspora-lattice-research/research/weave-lattice-c'
+mkdir -p build
+cc -Iinclude -std=c11 -O1 -g -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer src/weave.c src/research.c -o build/weave-research -lcrypto -lm
+cc -Iinclude -std=c11 -O1 -g -Wall -Wextra -Wpedantic -Werror -fsanitize=address,undefined -fno-omit-frame-pointer src/weave.c tests/test_weave.c -o build/weave-tests -lcrypto -lm
+./build/weave-tests
+PASS rejects_configuration
+PASS genesis_deterministic
+PASS mines_and_replays
+PASS wrong_parents_rejected
+PASS wrong_archives_rejected
+PASS tampered_payload_rejected
+PASS tampered_proof_rejected
+PASS tampered_binder_rejected
+PASS tampered_id_rejected
+PASS duplicate_slot_rejected
+PASS future_wave_rejected
+PASS descendant_cone
+PASS fork_worlds_are_distinct
+PASS archival_refs_replay_through_epochs
+PASS reject_capacity
+ALL 15 TESTS PASSED
+make[1]: Leaving directory '/mnt/data/diaspora-lattice-research/research/weave-lattice-c'

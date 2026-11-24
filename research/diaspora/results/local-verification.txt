@@ -1,0 +1,64 @@
+make: Entering directory '/workspace/scratch/52cfeae03360/diaspora/research/weave-lattice-c'
+./build/weave-tests
+PASS rejects_configuration
+PASS genesis_deterministic
+PASS mines_and_replays
+PASS wrong_parents_rejected
+PASS wrong_archives_rejected
+PASS tampered_payload_rejected
+PASS tampered_proof_rejected
+PASS tampered_binder_rejected
+PASS tampered_id_rejected
+PASS duplicate_slot_rejected
+PASS future_wave_rejected
+PASS descendant_cone
+PASS fork_worlds_are_distinct
+PASS archival_refs_replay_through_epochs
+PASS reject_capacity
+ALL 15 TESTS PASSED
+./build/weave-research --width 3 --waves 4 --bits 8
+{"model":"synchronous-coupled-cycle-DAG","width":3,"waves":4,"cycles":12,"verified":true,"difficulty_bits":8,"expected_unique_sha3_trials":12288,"rewritten_cycle":"0c872049bae4238b1272a0934a823cfa0c8bc0ffbde275edd5b5e7cb28a0b1c2","invalidated_descendants":9}
+./build/weave-research --width 5 --waves 4 --bits 8
+{"model":"synchronous-coupled-cycle-DAG","width":5,"waves":4,"cycles":20,"verified":true,"difficulty_bits":8,"expected_unique_sha3_trials":30720,"rewritten_cycle":"ea3a4bdc44a00646a4aad64b709a876b6660411d7858636cf33309b60607785a","invalidated_descendants":15}
+./build/weave-research --attack --trials 20000 --rounds 100 --seed 42
+MODEL: PoW deficit random walk. Defender starts 6 accepted units ahead.
+MODEL: each round gives 1 unit to the attacker with probability q, otherwise defender.
+MODEL: no lattice scheduling, consensus, network delays, witnesses, or finality.
+hash_share,successes,trials,success_fraction,round_limit
+0.30,117,20000,0.005850,100
+0.45,5050,20000,0.252500,100
+0.51,12294,20000,0.614700,100
+0.55,16832,20000,0.841600,100
+0.70,20000,20000,1.000000,100
+0.99,20000,20000,1.000000,100
+make: Leaving directory '/workspace/scratch/52cfeae03360/diaspora/research/weave-lattice-c'
+test_conflicting_duplicates_are_rejected (test_packet.PacketTest.test_conflicting_duplicates_are_rejected) ... ok
+test_corruption_is_reported (test_packet.PacketTest.test_corruption_is_reported) ... ok
+test_limits (test_packet.PacketTest.test_limits) ... ok
+test_loss_is_reported (test_packet.PacketTest.test_loss_is_reported) ... ok
+test_mixed_transfers_are_rejected (test_packet.PacketTest.test_mixed_transfers_are_rejected) ... ok
+test_reorder_and_duplicate (test_packet.PacketTest.test_reorder_and_duplicate) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+OK
+test_archives_deterministic_and_validated (test_weave.LatticeTests.test_archives_deterministic_and_validated) ... ok
+test_demo (test_weave.LatticeTests.test_demo) ... ok
+test_duplicate_slot_rejected (test_weave.LatticeTests.test_duplicate_slot_rejected) ... ok
+test_missing_one_strand_rejected (test_weave.LatticeTests.test_missing_one_strand_rejected) ... ok
+test_missing_parent_rejected (test_weave.LatticeTests.test_missing_parent_rejected) ... ok
+test_mutated_payload_breaks_parent_bound_pow (test_weave.LatticeTests.test_mutated_payload_breaks_parent_bound_pow) ... ok
+test_remine_ancestor_cannot_reuse_descendant_proofs (test_weave.LatticeTests.test_remine_ancestor_cannot_reuse_descendant_proofs) ... ok
+test_rewrite_propagates_cross_lattice (test_weave.LatticeTests.test_rewrite_propagates_cross_lattice) ... ok
+test_scales_to_five_strands (test_weave.LatticeTests.test_scales_to_five_strands) ... ok
+test_three_or_more_non_lane_frontier_dependencies (test_weave.LatticeTests.test_three_or_more_non_lane_frontier_dependencies) ... ok
+test_unique_work_accounting (test_weave.LatticeTests.test_unique_work_accounting) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.063s
+
+OK
+
+Wallet integration using upstream Bitcoin Core 29.0 Linux x86_64 release binaries
+PASS: wallet creation, mature funds, transaction byte round trip and confirmed receipt

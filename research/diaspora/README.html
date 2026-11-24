@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diaspora | Engineering notebook</title>
+<style>
+body { max-width: 70ch; margin: 3rem auto; padding: 0 1.25rem; font: 1rem/1.65 system-ui, sans-serif; color: #1f2721; background: #fbfcf7; }
+h1, h2 { line-height: 1.15; } h1 { font-size: 3rem; } a { color: #225839; } pre { overflow: auto; padding: 1rem; background: #e9efe6; border-radius: .25rem; } code { font-size: .92em; }
+</style>
+</head>
+<body>
+<header>
+<h1>Diaspora</h1>
+<p>I started Diaspora to build peer-to-peer money for the African diaspora. I want a person to own their keys, verify a payment, and still move a signed transaction when the usual connection goes down. This repository is where I keep the work and test those claims.</p>
+<nav aria-label="Contents"><a href="#setup">Setup</a> · <a href="#wallet">Wallet</a> · <a href="#radio">Radio</a> · <a href="#security">Security</a> · <a href="#records">Records</a></nav>
+</header>
+<main>
+<section id="setup">
+<h2>Set up the research build</h2>
+<p>Use Linux, macOS, or Ubuntu on WSL. The research tools require Python 3.10 or later, a C11 compiler, make, and OpenSSL development headers. For the inherited Core build, install the dependencies from the <a href="../../doc/build-unix.md">Unix</a>, <a href="../../doc/build-osx.md">macOS</a>, or <a href="../../doc/build-windows.md">Windows</a> build notes. Start from the repository root.</p>
+<pre><code>git clone --branch diaspora/integration-lab https://github.com/ya1-oa/diaspora-v1.git
+cd diaspora-v1
+make -C research/weave-lattice-c test research
+python3 -m unittest discover -s research/diaspora/lab -v
+(cd research/diaspora/archive/weave-python &amp;&amp; python3 -m unittest discover -s tests -v)</code></pre>
+</section>
+<section id="wallet">
+<h2>Run the wallet and payment lab</h2>
+<p>The wallet lab uses Bitcoin Core regtest with throwaway keys and test balances. The node listens for RPC on localhost and has no public peers. The script creates two descriptor wallets, mines spendable funds, prepares and signs a PSBT, round-trips a signed transaction through the packet files, broadcasts the recovered bytes, mines a confirmation and checks the receiver balance. The temporary datadir is removed after the node exits.</p>
+<pre><code>cmake -S . -B build -DBUILD_GUI=OFF -DENABLE_WALLET=ON
+cmake --build build --parallel 2
+bash research/diaspora/lab/wallet-smoke.sh "$PWD/build/bin"</code></pre>
+<p>You can pass an absolute path to a Bitcoin Core release binary directory to run the same baseline. The recorded run used Bitcoin Core 29.0. Use <code>DIASPORA_RPC_PORT=28443</code> before the command if the default port is in use. A standalone Diaspora ledger wallet remains part of the production target.</p>
+</section>
+<section id="radio">
+<h2>Rehearse a radio transfer on two computers</h2>
+<ol>
+<li>On the first machine, create public test data and packetize it. The lab uses a fixed header and 128-byte payload fragments, with at most 128 fragments.</li>
+<li>Copy the packet directory to the second machine over removable media or an isolated link. Try reordering the files or removing one to observe recovery and failure behavior.</li>
+<li>Reassemble the payload. Senders can resend missing fragments, and receivers may keep identical duplicates within the input limits.</li>
+</ol>
+<pre><code>printf 'Diaspora public radio lab\n' &gt; public.txt
+python3 research/diaspora/lab/packet.py encode public.txt packets
+# Copy packets/ to the second machine, then:
+python3 research/diaspora/lab/packet.py decode packets received.txt
+cat received.txt</code></pre>
+<p>For the hardware milestone, put an adapter between this packet format and a TNC or modem. Start with an isolated audio cable or shielded bench setup with public test strings. Specify a KISS/AX.25 information-field mapping or a LoRa gateway mapping, measure the modem's effective payload and airtime, and add pacing and retry limits before enabling any over-the-air mode. An actual RF adapter and satellite gateway remain release gates. In the United States, Part 97 limits amateur transmissions involving pecuniary interest and messages encoded to obscure their meaning. Verify service, equipment, and payload eligibility before transmitting. See <a href="https://www.law.cornell.edu/cfr/text/47/97.113">47 CFR § 97.113</a>.</p>
+<p>The packet hash verifies reassembly integrity. A blockchain node still validates the recovered transaction. Keep private keys and wallet backups off this transport.</p>
+</section>
+<section id="security">
+<h2>What the security tests establish</h2>
+<p>In the four-wave model, changing an early Cycle invalidates 9 later Cycles at width 3 and 15 at width 5. The linear hash-share baseline and the descendant count measure different things. L0 lacks a global fork choice, so it cannot establish a reversal threshold above 51%. See the <a href="../weave-lattice-c/docs/SECURITY_MODEL.md">L0 security model</a> and the <a href="PRODUCTION.md">production gates</a> for the comparison that still needs to be run.</p>
+</section>
+<section id="records">
+<h2>Read the work in order</h2>
+<ul>
+<li><a href="DEVELOPMENT-LOG.md">Development log and provenance</a></li>
+<li><a href="archive/D-Protocol.md">Original Loom of Fate protocol draft</a></li>
+<li><a href="../weave-lattice-c/README.md">C11 lattice research</a></li>
+<li><a href="archive/weave-python/README.md">Python reference</a></li>
+<li><a href="results/local-verification.txt">Verification transcript</a></li>
+<li><a href="PRODUCTION.md">Production target</a></li>
+</ul>
+</section>
+</main>
+</body>
+</html>
