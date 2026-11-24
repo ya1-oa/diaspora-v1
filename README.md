@@ -4,6 +4,7 @@ Diaspora is a peer-to-peer money and resilient networking research project for t
 
 - [Setup and wallet walkthrough](research/diaspora/README.html) (open locally in a browser)
 - [Production target and security gates](research/diaspora/PRODUCTION.md)
+- [Rust network file and fork choice](research/diaspora/weave-consensus/README.md)
 - [Development log](research/diaspora/DEVELOPMENT-LOG.md)
 - [Verification transcript](research/diaspora/results/local-verification.txt)
 
